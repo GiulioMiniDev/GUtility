@@ -19,10 +19,11 @@ namespace GUtility
             connection = new OleDbConnection(connectionString);
         }
 
-        public async Task<ObservableCollection<T>> GetAllAsync<T>() where T : new()
+        #region AsyncMethods
+        public async Task<List<T>> GetAllAsync<T>() where T : new()
         {
             await connection.OpenAsync();
-            ObservableCollection<T> result = new ObservableCollection<T>();
+            List<T> result = new List<T>();
 
             var cmd = connection.CreateCommand();
             cmd.CommandText = $"select * from {typeof(T).Name};";
@@ -37,6 +38,151 @@ namespace GUtility
             return result;
 
         }
+
+        public async Task InsertElementAsync<T>(T record) where T : class
+        {
+            await connection.OpenAsync();
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = CreateInsertQuery(record);
+            await cmd.ExecuteNonQueryAsync();
+            connection.Close();
+        }
+
+        public async Task InsertElementsAsync<T>(List<T> record) where T : class
+        {
+            await connection.OpenAsync();
+            var cmd = connection.CreateCommand();
+            foreach (var item in record)
+            {
+                cmd.CommandText = CreateInsertQuery(item);
+                await cmd.ExecuteNonQueryAsync();
+            }
+            connection.Close();
+        }
+
+
+        public async Task DeleteElementAsync<T>(T element) where T : class
+        {
+            await connection.OpenAsync();
+            var cmd = connection.CreateCommand();
+            var primaryKey = GetPrimaryKeyToDelete(element);
+            if (primaryKey == null)
+                return;
+
+            cmd.CommandText = $"delete from {typeof(T).Name} where {primaryKey.Name} = {primaryKey.GetValue(element, null)}";
+            await cmd.ExecuteNonQueryAsync();
+            connection.Close();
+        }
+
+        public async Task UpdateElementAsync<T>(T element) where T : class
+        {
+            await connection.OpenAsync();
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = CreateUpdateQuery(element);
+            cmd.ExecuteNonQuery();
+            connection.Close();
+        }
+
+        public async Task ExecuteScalarAsync(string query)
+        {
+            await connection.OpenAsync();
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = query;
+            await cmd.ExecuteScalarAsync();
+            connection.Close();
+        }
+
+        public async Task FreeNonQueryAsync(string query)
+        {
+            await connection.OpenAsync();
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = query;
+            await cmd.ExecuteNonQueryAsync();
+            connection.Close();
+        }
+        #endregion
+        #region SyncMethods
+        public List<T> GetAll<T>() where T : new()
+        {
+            connection.Open();
+            List<T> result = new List<T>();
+
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = $"select * from {typeof(T).Name};";
+            var reader = cmd.ExecuteReader();
+            DataTable dt = new DataTable();
+            dt.Load(reader);
+
+            foreach (DataRow row in dt.Rows)
+                result.Add(CreateItemFromRow<T>(row));
+
+            connection.Close();
+            return result;
+
+        }
+
+        public void InsertElement<T>(T record) where T : class
+        {
+            connection.Open();
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = CreateInsertQuery(record);
+            cmd.ExecuteNonQuery();
+            connection.Close();
+        }
+
+        public void InsertElements<T>(List<T> record) where T : class
+        {
+            connection.Open();
+            var cmd = connection.CreateCommand();
+            foreach (var item in record)
+            {
+                cmd.CommandText = CreateInsertQuery(item);
+                cmd.ExecuteNonQuery();
+            }
+            connection.Close();
+        }
+
+
+        public void DeleteElement<T>(T element) where T : class
+        {
+            connection.Open();
+            var cmd = connection.CreateCommand();
+            var primaryKey = GetPrimaryKeyToDelete(element);
+            if (primaryKey == null)
+                return;
+
+            cmd.CommandText = $"delete from {typeof(T).Name} where {primaryKey.Name} = {primaryKey.GetValue(element, null)}";
+            cmd.ExecuteNonQuery();
+            connection.Close();
+        }
+
+        public void UpdateElement<T>(T element) where T : class
+        {
+            connection.Open();
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = CreateUpdateQuery(element);
+            cmd.ExecuteNonQuery();
+            connection.Close();
+        }
+
+        public void ExecuteScalar(string query)
+        {
+            connection.Open();
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = query;
+            cmd.ExecuteScalar();
+            connection.Close();
+        }
+
+        public void FreeNonQuery(string query)
+        {
+            connection.Open();
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = query;
+            cmd.ExecuteNonQuery();
+            connection.Close();
+        }
+        #endregion
         #region Utiliy Generali
         private X CreateItemFromRow<X>(DataRow row) where X : new()
         {
@@ -68,7 +214,7 @@ namespace GUtility
 
             }
         }
-        #endregion
+       
         private string CreateInsertQuery<Y>(Y record) where Y : class //Utilizzabile anche per inserimenti multipli senza dover chiudere e riaprire la connessione ogni volta
         {
             StringBuilder sb = new StringBuilder();
@@ -131,40 +277,7 @@ namespace GUtility
 
         }
 
-        public async Task InsertElementAsync<T>(T record) where T : class
-        {
-            await connection.OpenAsync();
-            var cmd = connection.CreateCommand();
-            cmd.CommandText = CreateInsertQuery(record);
-            await cmd.ExecuteNonQueryAsync();
-            connection.Close();
-        }
-
-        public async Task InsertElementsAsync<T>(List<T> record) where T : class
-        {
-            await connection.OpenAsync();
-            var cmd = connection.CreateCommand();
-            foreach (var item in record)
-            {
-                cmd.CommandText = CreateInsertQuery(item);
-                await cmd.ExecuteNonQueryAsync();
-            }
-            connection.Close();
-        }
-
-
-        public async Task DeleteElementAsync<T>(T element) where T : class
-        {
-            await connection.OpenAsync();
-            var cmd = connection.CreateCommand();
-            var primaryKey = GetPrimaryKeyToDelete(element);
-            if (primaryKey == null)
-                return;
-
-            cmd.CommandText = $"delete from {typeof(T).Name} where {primaryKey.Name} = {primaryKey.GetValue(element, null)}";
-            await cmd.ExecuteNonQueryAsync();
-            connection.Close();
-        }
+        
         private string CreateUpdateQuery<Y>(Y record) where Y : class 
         {
             StringBuilder sb = new StringBuilder();
@@ -208,14 +321,9 @@ namespace GUtility
             sb.Append(" ;");
             return sb.ToString();
         }
-        public async Task UpdateElementAsync<T>(T element) where T : class
-        {
-            await connection.OpenAsync();
-            var cmd = connection.CreateCommand();
-            cmd.CommandText = CreateUpdateQuery(element);
-            cmd.ExecuteNonQuery();
-            connection.Close();
-        }
+        #endregion
+
+
     }
 
 }

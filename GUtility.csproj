@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net451;net450;</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>$(AssemblyName)</PackageId>
     <Authors>Giulio1287</Authors>
@@ -10,6 +10,9 @@ PS : This simple library has been developed with personal development purpose, s
     <PackageIcon>GUtilityLogo.png</PackageIcon>
     <PackageTags>Access Database</PackageTags>
     <EnableNETAnalyzers>True</EnableNETAnalyzers>
+    <Version>1.2.0.0</Version>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
