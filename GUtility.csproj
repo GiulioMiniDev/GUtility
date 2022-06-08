@@ -7,7 +7,6 @@
     <Authors>Giulio1287</Authors>
     <Description>This library aims to simplify the use of Access Database in C# with the possibility of doing some basics operation with the database without writing any queries. 
 PS : This simple library has been developed with personal development purpose, so it is not meant to be used in any professional setting.</Description>
-    <PackageIcon>GUtilityLogo.png</PackageIcon>
     <PackageTags>Access Database</PackageTags>
     <EnableNETAnalyzers>True</EnableNETAnalyzers>
     <Version>1.2.0.0</Version>
@@ -16,16 +15,12 @@ PS : This simple library has been developed with personal development purpose, s
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Npgsql">
+      <Version>6.0.4</Version>
+    </PackageReference>
     <PackageReference Include="System.Data.OleDb">
       <Version>6.0.0</Version>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\..\..\OneDrive\Immagini\GUtilityLogo.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
   </ItemGroup>
 
 </Project>
