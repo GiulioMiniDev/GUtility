@@ -1,5 +1,5 @@
 # GUtility
-Example of how to use it (made in dotnet 6 so there is no main explicited...):
+Example of how to use it (made in dotnet 6 & new c# version so there is no main explicited...):
 
 using GUtility;
 
